@@ -1,5 +1,14 @@
-import { Button } from "@nextui-org/react";
-
-export default function App() {
-  return <Button color="primary">Button</Button>;
+import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
+import Login from "./pages/Login";
+// Changed to default import
+function App() {
+  return (
+    <Router>
+      <Routes>
+        <Route path="/" element={<Login />} />
+      </Routes>
+    </Router>
+  );
 }
+
+export default App;
