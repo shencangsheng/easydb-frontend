@@ -39,6 +39,7 @@ import { Listbox, ListboxItem } from "@nextui-org/react";
 import { format } from "sql-formatter";
 import FilterList from "@/components/common/FilterList";
 import { post } from "@/services/api";
+import { extractTableNames } from "@/utils/sql-util";
 
 export const AcmeLogo = () => {
   return (
@@ -390,6 +391,7 @@ export default function App() {
                           sql: sql,
                         });
                         console.log(results);
+                        console.log(extractTableNames(sql));
                       } catch (error) {
                         console.error(error);
                       } finally {
@@ -463,6 +465,7 @@ export default function App() {
                   showLineNumbers: true,
                   tabSize: 2,
                 }}
+                editorProps={{ $blockScrolling: true }}
               />
             </div>
           </div>
