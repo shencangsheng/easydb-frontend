@@ -33,11 +33,12 @@ import {
   faScrewdriverWrench,
   faAlignLeft,
   faEraser,
+  faTable,
 } from "@fortawesome/free-solid-svg-icons";
 import { Listbox, ListboxItem } from "@nextui-org/react";
 import { format } from "sql-formatter";
-
 import FilterList from "@/components/common/FilterList";
+import { post } from "@/services/api";
 
 export const AcmeLogo = () => {
   return (
@@ -54,11 +55,14 @@ export const AcmeLogo = () => {
 
 export default function App() {
   const [isMenuOpen, setIsMenuOpen] = React.useState(false);
-  const [selected, setSelected] = React.useState("database");
+  const [selected, setSelected] = React.useState("databases");
   const [selectedSource, setSelectedSource] = React.useState("");
   const [isRunning, setIsRunning] = React.useState(false);
   const [sql, setSql] = React.useState("");
   const databases = ["default"];
+  const tables = ["user"];
+  const [selectedDatabase, setSelectedDatabase] = React.useState("");
+  const [selectedTable, setSelectedTable] = React.useState("");
 
   const formatSql = () => {
     setSql(format(sql, { language: "sql", keywordCase: "upper" }));
@@ -179,7 +183,7 @@ export default function App() {
             <Button
               isIconOnly
               aria-label="Like"
-              onPress={() => setSelected("database")}
+              onPress={() => setSelected("databases")}
               style={{
                 backgroundColor: "transparent",
                 fontSize: "21px",
@@ -189,7 +193,7 @@ export default function App() {
               <FontAwesomeIcon
                 icon={faDatabase}
                 size="lg"
-                color={selected === "database" ? "#000000" : "gray"}
+                color={selected === "databases" ? "#000000" : "gray"}
                 className="hover:text-black"
               />
             </Button>
@@ -228,7 +232,9 @@ export default function App() {
               </p>
               <Listbox
                 aria-label="Dynamic Actions"
-                onAction={(value) => setSelectedSource(value.toString())}
+                onAction={(value) => {
+                  setSelectedSource(value.toString());
+                }}
                 disabledKeys={["MySQL", "PostgreSQL"]}
                 style={{
                   width: "100%",
@@ -238,6 +244,9 @@ export default function App() {
                 <ListboxItem
                   key="EasyDB"
                   startContent={<FontAwesomeIcon icon={faServer} />}
+                  onPress={() => {
+                    setSelectedSource("EasyDB");
+                  }}
                 >
                   EasyDB
                 </ListboxItem>
@@ -269,7 +278,13 @@ export default function App() {
               >
                 <Button
                   isIconOnly
-                  onPress={() => setSelectedSource("")}
+                  onPress={() => {
+                    if (selectedDatabase === "") {
+                      setSelectedSource("");
+                    } else {
+                      setSelectedDatabase("");
+                    }
+                  }}
                   style={{
                     backgroundColor: "transparent",
                     fontSize: "16px",
@@ -278,10 +293,10 @@ export default function App() {
                   <FontAwesomeIcon icon={faChevronLeft} />
                 </Button>
                 <FontAwesomeIcon
-                  icon={faServer}
+                  icon={selectedDatabase !== "" ? faDatabase : faServer}
                   style={{ marginRight: "5px" }}
                 />
-                {selectedSource}
+                {selectedDatabase === "" ? selectedSource : selectedDatabase}
               </p>
               <p
                 style={{
@@ -292,9 +307,22 @@ export default function App() {
                   color: "gray", // Set text color to gray
                 }}
               >
-                Databases
+                {selectedTable === "" ? "Databases" : "Tables"}
               </p>
-              <FilterList items={databases} />
+              {selectedDatabase === "" ? (
+                <FilterList
+                  items={databases}
+                  icon={<FontAwesomeIcon icon={faDatabase} />}
+                  onSelect={(value: string) => {
+                    setSelectedDatabase(value.toString());
+                  }}
+                />
+              ) : (
+                <FilterList
+                  items={tables}
+                  icon={<FontAwesomeIcon icon={faTable} />}
+                />
+              )}
             </div>
           )}
         </div>
@@ -354,7 +382,21 @@ export default function App() {
                   isIconOnly
                   isDisabled={selectedSource === "" || sql === ""}
                   style={{ backgroundColor: "transparent" }}
-                  onPress={() => setIsRunning(!isRunning)}
+                  onPress={async () => {
+                    setIsRunning(!isRunning);
+                    if (!isRunning) {
+                      try {
+                        const results: [[]] = await post("/api/product", {
+                          sql: sql,
+                        });
+                        console.log(results);
+                      } catch (error) {
+                        console.error(error);
+                      } finally {
+                        setIsRunning(false);
+                      }
+                    }
+                  }}
                 >
                   <FontAwesomeIcon
                     icon={isRunning ? faStop : faPlay}
@@ -424,7 +466,7 @@ export default function App() {
               />
             </div>
           </div>
-          <div>Item 4</div>
+          <div>item4</div>
         </div>
         <div
           style={{

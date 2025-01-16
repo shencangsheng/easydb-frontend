@@ -1,8 +1,20 @@
+import { Listbox, ListboxItem } from "@nextui-org/react";
 import { useState } from "react";
 
-const FilterList = ({ items }: { items: string[] }) => {
-  const [filterText, setFilterText] = useState("");
+interface FilterListProps {
+  items: string[];
+  placeholderText?: string;
+  icon?: React.ReactNode;
+  onSelect?: (item: string) => void;
+}
 
+const FilterList: React.FC<FilterListProps> = ({
+  items,
+  placeholderText = "Filter...",
+  icon,
+  onSelect,
+}) => {
+  const [filterText, setFilterText] = useState("");
   const filteredItems = items.filter((item) =>
     item.toLowerCase().includes(filterText.toLowerCase())
   );
@@ -11,27 +23,32 @@ const FilterList = ({ items }: { items: string[] }) => {
     <div>
       <input
         type="text"
-        placeholder="Filter items..."
+        placeholder={placeholderText}
         value={filterText}
         onChange={(e) => setFilterText(e.target.value)}
         style={{
-          width: "100%",
+          width: "98%",
           padding: "8px",
           marginBottom: "10px",
           border: "1px solid #ccc",
           borderRadius: "4px",
+          marginTop: "10px",
         }}
       />
-      <ul style={{ listStyleType: "none", padding: 0 }}>
-        {filteredItems.map((item, index) => (
-          <li
-            key={index}
-            style={{ padding: "8px", borderBottom: "1px solid #eee" }}
-          >
+      <Listbox
+        aria-label="Dynamic Actions"
+        style={{
+          width: "100%",
+          textAlign: "left",
+        }}
+        onAction={(value) => onSelect?.(value.toString())}
+      >
+        {filteredItems.map((item) => (
+          <ListboxItem key={item} startContent={icon && icon}>
             {item}
-          </li>
+          </ListboxItem>
         ))}
-      </ul>
+      </Listbox>
     </div>
   );
 };
