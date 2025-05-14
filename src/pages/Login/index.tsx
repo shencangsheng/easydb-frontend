@@ -64,7 +64,6 @@ export default function App() {
   const databases = ["default"];
   const [tables, setTables] = React.useState<string[]>([]);
   const [selectedDatabase, setSelectedDatabase] = React.useState("");
-  const [selectedTable, setSelectedTable] = React.useState("");
   const [isLoading, setIsLoading] = React.useState(false);
 
   const [data, setData] = React.useState<{
