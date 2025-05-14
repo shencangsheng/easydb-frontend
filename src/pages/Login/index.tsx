@@ -19,7 +19,14 @@ import {
   DropdownTrigger,
   DropdownMenu,
   DropdownItem,
-} from "@nextui-org/react";
+  Table,
+  TableHeader,
+  TableColumn,
+  TableBody,
+  TableRow,
+  TableCell,
+  Spinner,
+} from "@heroui/react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faBars,
@@ -34,12 +41,14 @@ import {
   faAlignLeft,
   faEraser,
   faTable,
+  IconDefinition,
 } from "@fortawesome/free-solid-svg-icons";
-import { Listbox, ListboxItem } from "@nextui-org/react";
+import { Listbox, ListboxItem } from "@heroui/react";
 import { format } from "sql-formatter";
 import FilterList from "@/components/common/FilterList";
-import { post } from "@/services/api";
+import { post, get } from "@/services/api";
 import { extractTableNames } from "@/utils/sql-util";
+import DataTable from "./Table";
 
 export const AcmeLogo = () => {
   return (
@@ -57,13 +66,42 @@ export const AcmeLogo = () => {
 export default function App() {
   const [isMenuOpen, setIsMenuOpen] = React.useState(false);
   const [selected, setSelected] = React.useState("databases");
-  const [selectedSource, setSelectedSource] = React.useState("");
+  const [selectedSource, setSelectedSource] = React.useState("EasyDB");
   const [isRunning, setIsRunning] = React.useState(false);
   const [sql, setSql] = React.useState("");
   const databases = ["default"];
-  const tables = ["user"];
+  const [tables, setTables] = React.useState<string[]>([]);
   const [selectedDatabase, setSelectedDatabase] = React.useState("");
   const [selectedTable, setSelectedTable] = React.useState("");
+  const [isLoading, setIsLoading] = React.useState(false);
+
+  const [data, setData] = React.useState<{
+    header: string[];
+    rows: string[][];
+  }>({
+    header: [],
+    rows: [],
+  });
+
+  const [location, setLocation] = React.useState<string[]>([]);
+
+  function getCurrentLocation(pop: boolean = false) {
+    console.log(location);
+    if (pop) {
+      return location.pop();
+    }
+    return location[location.length - 1];
+  }
+
+  const getIcon = (): IconDefinition => {
+    switch (getCurrentLocation()) {
+      case "Databases":
+        return faServer;
+      case "Tables":
+        return faDatabase;
+    }
+    throw new Error("Invalid location");
+  };
 
   const formatSql = () => {
     setSql(format(sql, { language: "sql", keywordCase: "upper" }));
@@ -217,7 +255,7 @@ export default function App() {
               />
             </Button>
           </div>
-          {selectedSource === "" ? (
+          {location.length === 0 ? (
             <div>
               <p
                 style={{
@@ -246,6 +284,7 @@ export default function App() {
                   key="EasyDB"
                   startContent={<FontAwesomeIcon icon={faServer} />}
                   onPress={() => {
+                    setLocation(["Databases"]);
                     setSelectedSource("EasyDB");
                   }}
                 >
@@ -280,11 +319,16 @@ export default function App() {
                 <Button
                   isIconOnly
                   onPress={() => {
-                    if (selectedDatabase === "") {
-                      setSelectedSource("");
-                    } else {
-                      setSelectedDatabase("");
+                    const currentLocation = getCurrentLocation(true);
+                    switch (currentLocation) {
+                      case "Databases":
+                        setSelectedSource("");
+                        break;
+                      case "Tables":
+                        setTables([]);
+                        break;
                     }
+                    setLocation(location);
                   }}
                   style={{
                     backgroundColor: "transparent",
@@ -294,10 +338,12 @@ export default function App() {
                   <FontAwesomeIcon icon={faChevronLeft} />
                 </Button>
                 <FontAwesomeIcon
-                  icon={selectedDatabase !== "" ? faDatabase : faServer}
+                  icon={getIcon()}
                   style={{ marginRight: "5px" }}
                 />
-                {selectedDatabase === "" ? selectedSource : selectedDatabase}
+                {getCurrentLocation() === "Databases"
+                  ? selectedSource
+                  : selectedDatabase}
               </p>
               <p
                 style={{
@@ -308,14 +354,25 @@ export default function App() {
                   color: "gray", // Set text color to gray
                 }}
               >
-                {selectedTable === "" ? "Databases" : "Tables"}
+                {tables.length === 0 ? "Databases" : "Tables"}
               </p>
-              {selectedDatabase === "" ? (
+              {tables.length === 0 ? (
                 <FilterList
                   items={databases}
                   icon={<FontAwesomeIcon icon={faDatabase} />}
-                  onSelect={(value: string) => {
+                  onSelect={async (value: string) => {
                     setSelectedDatabase(value.toString());
+                    location.push("Tables");
+                    setLocation(location);
+                    const catalog: [
+                      {
+                        id: number;
+                        table_ref: string;
+                        table_path: string;
+                        table_schema: [];
+                      }
+                    ] = await get("/api/catalog");
+                    setTables(catalog.map((p) => p.table_ref));
                   }}
                 />
               ) : (
@@ -333,6 +390,7 @@ export default function App() {
             textAlign: "center",
             borderLeft: "1px solid rgba(17, 17, 17, 0.15)",
             borderRight: "1px solid rgba(17, 17, 17, 0.15)",
+            overflow: "hidden",
           }}
         >
           <div
@@ -387,15 +445,19 @@ export default function App() {
                     setIsRunning(!isRunning);
                     if (!isRunning) {
                       try {
-                        const results: [[]] = await post("/api/product", {
+                        setIsLoading(true);
+                        const results: {
+                          header: string[];
+                          rows: string[][];
+                        } = await post("/api/fetch", {
                           sql: sql,
                         });
-                        console.log(results);
-                        console.log(extractTableNames(sql));
+                        setData(results);
                       } catch (error) {
                         console.error(error);
                       } finally {
                         setIsRunning(false);
+                        setIsLoading(false);
                       }
                     }
                   }}
@@ -469,7 +531,7 @@ export default function App() {
               />
             </div>
           </div>
-          <div>item4</div>
+          <DataTable data={data} isLoading={isLoading} />
         </div>
         <div
           style={{
