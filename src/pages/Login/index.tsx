@@ -19,13 +19,6 @@ import {
   DropdownTrigger,
   DropdownMenu,
   DropdownItem,
-  Table,
-  TableHeader,
-  TableColumn,
-  TableBody,
-  TableRow,
-  TableCell,
-  Spinner,
 } from "@heroui/react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -47,7 +40,6 @@ import { Listbox, ListboxItem } from "@heroui/react";
 import { format } from "sql-formatter";
 import FilterList from "@/components/common/FilterList";
 import { post, get } from "@/services/api";
-import { extractTableNames } from "@/utils/sql-util";
 import DataTable from "./Table";
 
 export const AcmeLogo = () => {
