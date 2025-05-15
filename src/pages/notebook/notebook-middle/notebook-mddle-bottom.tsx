@@ -1,6 +1,8 @@
-import { Tabs, Tab, Card, CardBody } from "@heroui/react";
-import { memo } from "react";
+import { Tabs, Tab } from "@heroui/react";
+import { memo, useState } from "react";
 import DataTable from "./notebook-middle-table";
+import QueryHistory from "./notebook-middle-history";
+import { get } from "@/services/api";
 
 interface NotebookMiddleBottomProps {
   data: {
@@ -8,16 +10,35 @@ interface NotebookMiddleBottomProps {
     rows: string[][];
   };
   isLoading: boolean;
+  setSql: (sql: string) => void;
 }
 
-function NotebookMiddleBottom({ data, isLoading }: NotebookMiddleBottomProps) {
+function NotebookMiddleBottom({
+  data,
+  isLoading,
+  setSql,
+}: NotebookMiddleBottomProps) {
+  const [queryHistory, setQueryHistory] = useState<
+    {
+      sql: string;
+      created_at: string;
+      status: string;
+    }[]
+  >([]);
+
   return (
     <div className="flex w-full flex-col">
-      <Tabs variant="underlined" defaultSelectedKey="results">
+      <Tabs
+        variant="underlined"
+        defaultSelectedKey="results"
+        onSelectionChange={async (key) => {
+          if (key === "history") {
+            setQueryHistory(await get("/api/query/history"));
+          }
+        }}
+      >
         <Tab key="history" title="Query History">
-          <Card>
-            <CardBody></CardBody>
-          </Card>
+          <QueryHistory setSql={setSql} data={queryHistory} />
         </Tab>
         <Tab key="results" title="Results">
           <DataTable data={data} isLoading={isLoading} />

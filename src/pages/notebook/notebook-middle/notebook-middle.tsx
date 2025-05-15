@@ -183,7 +183,11 @@ function NotebookMiddle({ source }: NotebookMiddleProps) {
         </div>
       </div>
       <div style={{ marginTop: "20px", marginLeft: "50px" }}>
-        <NotebookMiddleBottom data={data} isLoading={isLoading} />
+        <NotebookMiddleBottom
+          data={data}
+          isLoading={isLoading}
+          setSql={setSql}
+        />
       </div>
     </div>
   );

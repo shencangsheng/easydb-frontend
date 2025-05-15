@@ -82,7 +82,7 @@ function DataTable({ data, isLoading }: TableProps) {
   return (
     <div
       style={{
-        height: "calc(40vh - 60px)",
+        height: "calc(40vh - 50px)",
         width: "100%",
         overflow: "hidden",
         // border: "1px solid rgba(17, 17, 17, 0.15)",
