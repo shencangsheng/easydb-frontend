@@ -27,5 +27,5 @@
       "@/*": ["src/*"]
     }
   },
-  "include": ["src", "types"]
+  "include": ["src", "types", "src/pages/notebook/index.tsx"]
 }
