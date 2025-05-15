@@ -1,4 +1,4 @@
-import FilterList from "@/components/common/FilterList";
+import FilterList from "@/components/common/filter-list";
 import {
   faChevronLeft,
   faDatabase,
@@ -10,8 +10,10 @@ import { Button, Listbox, ListboxItem } from "@heroui/react";
 import { get } from "@/services/api";
 import { memo, useState } from "react";
 
-// eslint-disable-next-line @typescript-eslint/no-empty-object-type
-interface NotebookLeftProps {}
+interface NotebookLeftProps {
+  source: string;
+  setSource: (source: string) => void;
+}
 
 interface Catalog {
   id: number;
@@ -20,9 +22,7 @@ interface Catalog {
   table_schema: [];
 }
 
-// eslint-disable-next-line no-empty-pattern
-function NotebookLeft({}: NotebookLeftProps) {
-  const [source, setSource] = useState<string>("");
+function NotebookLeft({ source, setSource }: NotebookLeftProps) {
   const [tables, setTables] = useState<Catalog[]>([]);
 
   async function refreshTables() {
