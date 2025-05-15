@@ -1,5 +1,8 @@
 import { post } from "@/services/api";
 import AceEditor from "react-ace";
+import "ace-builds/src-noconflict/theme-monokai";
+import "ace-builds/src-noconflict/mode-sql";
+import "ace-builds/src-noconflict/ext-language_tools";
 import {
   faServer,
   faStop,
@@ -18,14 +21,14 @@ import {
 } from "@heroui/react";
 import { memo, useState } from "react";
 import { format } from "sql-formatter";
-import DataTable from "./notebook-middle-table";
+import NotebookMiddleBottom from "./notebook-mddle-bottom";
 
 interface NotebookMiddleProps {
   source: string;
 }
 
 function NotebookMiddle({ source }: NotebookMiddleProps) {
-  const [sql, setSql] = useState("");
+  const [sql, setSql] = useState("select * from snv");
   const [isRunning, setIsRunning] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [data, setData] = useState<{
@@ -72,7 +75,7 @@ function NotebookMiddle({ source }: NotebookMiddleProps) {
         style={{
           display: "flex",
           justifyContent: "space-between",
-          height: "60%",
+          height: "45%",
           width: "100%",
           overflowY: "auto", // Enable vertical scrolling
           flex: 1,
@@ -90,7 +93,7 @@ function NotebookMiddle({ source }: NotebookMiddleProps) {
           <div>
             <Button
               isIconOnly
-              isDisabled={source === "" || sql === ""}
+              isDisabled={sql === ""}
               style={{ backgroundColor: "transparent" }}
               onPress={async () => {
                 setIsRunning(!isRunning);
@@ -179,7 +182,9 @@ function NotebookMiddle({ source }: NotebookMiddleProps) {
           />
         </div>
       </div>
-      <DataTable data={data} isLoading={isLoading} />
+      <div style={{ marginTop: "20px", marginLeft: "50px" }}>
+        <NotebookMiddleBottom data={data} isLoading={isLoading} />
+      </div>
     </div>
   );
 }
