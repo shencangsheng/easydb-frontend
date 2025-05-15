@@ -19,6 +19,7 @@ import { memo, useState } from "react";
 type TableRow = {
   id: string;
   values: string[];
+  index: number;
 };
 
 interface TableProps {
@@ -32,9 +33,42 @@ interface TableProps {
 const transformTableData = (rows: string[][]): TableRow[] => {
   return rows.map((row, index) => ({
     id: `row-${index}`,
-    values: row,
+    values: [`${index + 1}`, ...row],
+    index: index,
   }));
 };
+
+function getHeader(header: string[]) {
+  const headers = [];
+  headers.push(
+    <TableColumn
+      key="row-number"
+      style={{
+        backgroundColor: "white",
+        borderBottom: "1px solid rgba(17, 17, 17, 0.15)",
+        width: "40px",
+      }}
+    >
+      #
+    </TableColumn>
+  );
+  header.forEach((column) => {
+    headers.push(
+      <TableColumn
+        key={column}
+        style={{
+          backgroundColor: "white",
+          borderBottom: "1px solid rgba(17, 17, 17, 0.15)",
+          fontWeight: "bold",
+          fontSize: "0.9em",
+        }}
+      >
+        {column}
+      </TableColumn>
+    );
+  });
+  return headers;
+}
 
 function DataTable({ data, isLoading }: TableProps) {
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
@@ -54,18 +88,8 @@ function DataTable({ data, isLoading }: TableProps) {
         // border: "1px solid rgba(17, 17, 17, 0.15)",
       }}
     >
-      <Table
-        aria-label="Example table with dynamic content"
-        isVirtualized={true}
-        maxTableHeight={500}
-        rowHeight={40}
-        isStriped
-      >
-        <TableHeader>
-          {data.header.map((column) => (
-            <TableColumn key={column}>{column}</TableColumn>
-          ))}
-        </TableHeader>
+      <Table isVirtualized={true} maxTableHeight={500} rowHeight={40}>
+        <TableHeader>{getHeader(data.header)}</TableHeader>
         <TableBody
           items={transformTableData(data.rows)}
           isLoading={isLoading}
@@ -98,7 +122,21 @@ function DataTable({ data, isLoading }: TableProps) {
               {item.values.map((value, index) => (
                 <TableCell
                   key={`${item.id}-${index}`}
-                  style={{ whiteSpace: "nowrap" }}
+                  style={{
+                    whiteSpace: "nowrap",
+                    ...(index === 0
+                      ? {
+                          position: "sticky",
+                          left: 0,
+                          backgroundColor: "#f5f5f5",
+                          zIndex: 1,
+                        }
+                      : {
+                          backgroundColor:
+                            item.index % 2 === 0 ? "#f5f5f5" : "#ffffff",
+                        }),
+                    borderBottom: "1px solid rgba(17, 17, 17, 0.15)",
+                  }}
                 >
                   {value}
                 </TableCell>
@@ -125,14 +163,16 @@ function DataTable({ data, isLoading }: TableProps) {
               >
                 <table className="w-full border-collapse border border-gray-200">
                   <tbody>
-                    {selectedItem.values.map((value, index) => (
-                      <tr key={index} className="border-b border-gray-200">
-                        <th className="py-2 px-4 text-left bg-gray-50 font-medium">
-                          {data.header[index]}
-                        </th>
-                        <td className="py-2 px-4">{value}</td>
-                      </tr>
-                    ))}
+                    {selectedItem.values
+                      .filter((_value, index) => index !== 0)
+                      .map((value, index) => (
+                        <tr key={index} className="border-b border-gray-200">
+                          <th className="py-2 px-4 text-left bg-gray-50 font-medium">
+                            {data.header[index]}
+                          </th>
+                          <td className="py-2 px-4">{value}</td>
+                        </tr>
+                      ))}
                   </tbody>
                 </table>
               </div>
