@@ -28,7 +28,7 @@ interface NotebookMiddleProps {
 }
 
 function NotebookMiddle({ source }: NotebookMiddleProps) {
-  const [sql, setSql] = useState("select * from snv");
+  const [sql, setSql] = useState("");
   const [isRunning, setIsRunning] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [data, setData] = useState<{
