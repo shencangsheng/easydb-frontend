@@ -1,4 +1,4 @@
-import { downloadFile, post } from "@/services/api";
+import { downloadFile } from "@/services/api";
 import {
   faCode,
   faDownload,
@@ -26,7 +26,6 @@ import {
   useDisclosure,
 } from "@heroui/react";
 import { memo, useState } from "react";
-import { sql } from "sql-formatter";
 
 type TableRow = {
   id: string;
