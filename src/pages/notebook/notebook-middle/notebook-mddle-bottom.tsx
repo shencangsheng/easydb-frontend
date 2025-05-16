@@ -12,12 +12,14 @@ interface NotebookMiddleBottomProps {
   };
   isLoading: boolean;
   setSql: (sql: string) => void;
+  sql: string;
 }
 
 function NotebookMiddleBottom({
   data,
   isLoading,
   setSql,
+  sql,
 }: NotebookMiddleBottomProps) {
   const [queryHistory, setQueryHistory] = useState<
     {
@@ -42,7 +44,7 @@ function NotebookMiddleBottom({
           <QueryHistory setSql={setSql} data={queryHistory} />
         </Tab>
         <Tab key="results" title={`Results`}>
-          <DataTable data={data} isLoading={isLoading} />
+          <DataTable data={data} isLoading={isLoading} sql={sql} />
         </Tab>
         <Tab
           key="query_time"

@@ -1,6 +1,17 @@
-import { faTable } from "@fortawesome/free-solid-svg-icons";
+import { downloadFile, post } from "@/services/api";
+import {
+  faCode,
+  faDownload,
+  faFileCsv,
+  faTable,
+} from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
+  Button,
+  Dropdown,
+  DropdownItem,
+  DropdownMenu,
+  DropdownTrigger,
   Modal,
   ModalBody,
   ModalContent,
@@ -15,6 +26,7 @@ import {
   useDisclosure,
 } from "@heroui/react";
 import { memo, useState } from "react";
+import { sql } from "sql-formatter";
 
 type TableRow = {
   id: string;
@@ -28,6 +40,7 @@ interface TableProps {
     rows: string[][];
   };
   isLoading: boolean;
+  sql: string;
 }
 
 const transformTableData = (rows: string[][]): TableRow[] => {
@@ -70,7 +83,7 @@ function getHeader(header: string[]) {
   return headers;
 }
 
-function DataTable({ data, isLoading }: TableProps) {
+function DataTable({ data, isLoading, sql }: TableProps) {
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
   const [selectedItem, setSelectedItem] = useState<TableRow | null>(null);
 
@@ -79,16 +92,63 @@ function DataTable({ data, isLoading }: TableProps) {
     onOpen();
   };
 
+  async function exportResults(fileType: string) {
+    await downloadFile("/api/query/export", {
+      sql: sql,
+      file_type: fileType,
+    });
+  }
+
   return (
     <div
       style={{
+        display: "flex",
         height: "calc(40vh - 50px)",
         width: "100%",
         overflow: "hidden",
         // border: "1px solid rgba(17, 17, 17, 0.15)",
       }}
     >
-      <Table isVirtualized={true} maxTableHeight={500} rowHeight={40}>
+      <div
+        style={{
+          justifyContent: "flex-end",
+          paddingTop: "15px",
+        }}
+      >
+        <Dropdown placement="bottom-start" isDisabled={data.rows.length === 0}>
+          <DropdownTrigger>
+            <Button variant="light" isIconOnly>
+              <FontAwesomeIcon icon={faDownload} />
+            </Button>
+          </DropdownTrigger>
+          <DropdownMenu aria-label="Static Actions">
+            <DropdownItem
+              key="csv"
+              onPress={async () => await exportResults("CSV")}
+            >
+              <FontAwesomeIcon
+                icon={faFileCsv}
+                style={{ marginRight: "5px" }}
+              />
+              CSV
+            </DropdownItem>
+            <DropdownItem
+              key="json"
+              onPress={async () => await exportResults("JSON")}
+            >
+              <FontAwesomeIcon icon={faCode} style={{ marginRight: "5px" }} />
+              JSON
+            </DropdownItem>
+          </DropdownMenu>
+        </Dropdown>
+      </div>
+
+      <Table
+        isVirtualized={true}
+        maxTableHeight={500}
+        rowHeight={40}
+        radius={"none"}
+      >
         <TableHeader>{getHeader(data.header)}</TableHeader>
         <TableBody
           items={transformTableData(data.rows)}

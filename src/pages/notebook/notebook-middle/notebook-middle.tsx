@@ -190,6 +190,7 @@ function NotebookMiddle({ source }: NotebookMiddleProps) {
           data={data}
           isLoading={isLoading}
           setSql={setSql}
+          sql={sql}
         />
       </div>
     </div>

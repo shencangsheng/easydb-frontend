@@ -57,3 +57,55 @@ export const put = async <D, T>(
 export const del = async <T>(url: string): Promise<T> => {
   return handleResponse<T>(apiClient.delete<ApiResponse<T>>(url), "DELETE");
 };
+
+// 封装下载文件的 POST 请求
+export const downloadFile = async (
+  url: string,
+  data?: Record<string, any>
+): Promise<void> => {
+  try {
+    const response = await apiClient.post(url, data, {
+      responseType: "blob",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/octet-stream",
+      },
+    });
+
+    // 从响应头中获取文件名
+    const contentDisposition =
+      response.headers["content-disposition"] || response.headers["attachment"];
+    let filename = "download";
+
+    if (contentDisposition) {
+      const filenameMatch = contentDisposition.match(
+        /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/i
+      );
+      if (filenameMatch && filenameMatch[1]) {
+        filename = filenameMatch[1].replace(/['"]/g, "").trim();
+      }
+    }
+
+    // 创建 Blob URL 并触发下载
+    const blob = new Blob([response.data], {
+      type: response.headers["content-type"] || "application/octet-stream",
+    });
+    const downloadUrl = window.URL.createObjectURL(blob);
+
+    // 使用隐藏的 a 元素进行下载
+    const link = document.createElement("a");
+    link.style.display = "none";
+    link.href = downloadUrl;
+    link.setAttribute("download", filename);
+    document.body.appendChild(link);
+    link.click();
+
+    // 延迟清理，确保下载开始
+    setTimeout(() => {
+      window.URL.revokeObjectURL(downloadUrl);
+      document.body.removeChild(link);
+    }, 100);
+  } catch (error) {
+    handleRequestError(error as AxiosError, "DOWNLOAD");
+  }
+};
