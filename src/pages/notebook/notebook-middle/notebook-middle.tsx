@@ -34,7 +34,8 @@ function NotebookMiddle({ source }: NotebookMiddleProps) {
   const [data, setData] = useState<{
     header: string[];
     rows: string[][];
-  }>({ header: [], rows: [] });
+    query_time: string;
+  }>({ header: [], rows: [], query_time: "" });
 
   const formatSql = () => {
     setSql(format(sql, { language: "sql", keywordCase: "upper" }));
@@ -99,10 +100,12 @@ function NotebookMiddle({ source }: NotebookMiddleProps) {
                 setIsRunning(!isRunning);
                 if (!isRunning) {
                   try {
+                    setData({ header: [], rows: [], query_time: "" });
                     setIsLoading(true);
                     const results: {
                       header: string[];
                       rows: string[][];
+                      query_time: string;
                     } = await post("/api/fetch", {
                       sql: sql,
                     });

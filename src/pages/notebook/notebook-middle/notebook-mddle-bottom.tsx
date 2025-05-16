@@ -8,6 +8,7 @@ interface NotebookMiddleBottomProps {
   data: {
     header: string[];
     rows: string[][];
+    query_time: string;
   };
   isLoading: boolean;
   setSql: (sql: string) => void;
@@ -40,8 +41,23 @@ function NotebookMiddleBottom({
         <Tab key="history" title="Query History">
           <QueryHistory setSql={setSql} data={queryHistory} />
         </Tab>
-        <Tab key="results" title="Results">
+        <Tab key="results" title={`Results`}>
           <DataTable data={data} isLoading={isLoading} />
+        </Tab>
+        <Tab
+          key="query_time"
+          title={
+            <span>
+              Query Time ({" "}
+              <span style={{ color: "green" }}>{data.query_time ?? "-"}</span> )
+            </span>
+          }
+          disabled={true}
+        >
+          <div>
+            <p>Query Time</p>
+            <p>{data.query_time ?? "-"}</p>
+          </div>
         </Tab>
       </Tabs>
     </div>

@@ -6,7 +6,16 @@ import {
   faTable,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { Button, Listbox, ListboxItem } from "@heroui/react";
+import {
+  Button,
+  Listbox,
+  ListboxItem,
+  Modal,
+  ModalBody,
+  ModalContent,
+  ModalHeader,
+  useDisclosure,
+} from "@heroui/react";
 import { get } from "@/services/api";
 import { memo, useState } from "react";
 
@@ -19,7 +28,13 @@ interface Catalog {
   id: number;
   table_ref: string;
   table_path: string;
-  table_schema: [];
+  table_schema: [
+    {
+      field: string;
+      field_type: string;
+      comment?: string;
+    }
+  ];
 }
 
 function NotebookLeft({ source, setSource }: NotebookLeftProps) {
@@ -29,6 +44,14 @@ function NotebookLeft({ source, setSource }: NotebookLeftProps) {
     const catalog: Catalog[] = await get("/api/catalog");
     setTables(catalog);
   }
+
+  const { isOpen, onOpen, onOpenChange } = useDisclosure();
+  const [selectTable, setSelectTable] = useState<Catalog | null>(null);
+
+  const handleTableClick = (item: string) => {
+    setSelectTable(tables.find((table) => table.table_ref === item) ?? null);
+    onOpen();
+  };
 
   return (
     <div
@@ -154,9 +177,96 @@ function NotebookLeft({ source, setSource }: NotebookLeftProps) {
           <FilterList
             items={tables.map((table) => table.table_ref)}
             icon={<FontAwesomeIcon icon={faTable} />}
+            onSelect={(item) => {
+              handleTableClick(item);
+            }}
           />
         </div>
       )}
+      <Modal
+        isOpen={isOpen}
+        onOpenChange={onOpenChange}
+        style={{
+          maxWidth: "40vw",
+          position: "absolute",
+          top: "0",
+          left: "340px",
+          height: "500px",
+        }}
+      >
+        <ModalContent>
+          <ModalHeader>
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "left",
+                alignItems: "center",
+                width: "100%",
+              }}
+            >
+              <FontAwesomeIcon icon={faTable} style={{ marginRight: "8px" }} />{" "}
+              {selectTable?.table_ref}
+            </div>
+          </ModalHeader>
+          <ModalBody>
+            {selectTable && (
+              <div
+                style={{
+                  height: "100%",
+                }}
+              >
+                <h3
+                  style={{
+                    fontSize: "16px",
+                    fontWeight: "bold",
+                    marginBottom: "10px",
+                  }}
+                >
+                  <div style={{ color: "#6b7280" }}>
+                    Location: {selectTable.table_path}
+                  </div>
+                  Columns ({selectTable.table_schema.length})
+                </h3>
+                <div
+                  style={{
+                    maxHeight: "350px",
+                    overflowY: "auto",
+                    marginTop: "20px",
+                  }}
+                >
+                  <table className="w-full border-collapse border border-gray-200">
+                    <thead style={{ position: "sticky", top: 0, zIndex: 1 }}>
+                      <tr className="bg-gray-50">
+                        <th className="py-2 px-4 text-left font-medium">
+                          Name
+                        </th>
+                        <th className="py-2 px-4 text-left font-medium">
+                          Type
+                        </th>
+                        <th className="py-2 px-4 text-left font-medium">
+                          Comment
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {selectTable.table_schema.map((column) => (
+                        <tr
+                          key={column.field}
+                          className="border-t border-gray-200"
+                        >
+                          <td className="py-2 px-4">{column.field}</td>
+                          <td className="py-2 px-4">{column.field_type}</td>
+                          <td className="py-2 px-4">{column.comment}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+          </ModalBody>
+        </ModalContent>
+      </Modal>
     </div>
   );
 }

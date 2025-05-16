@@ -52,7 +52,7 @@ function getHeader(header: string[]) {
       #
     </TableColumn>
   );
-  header.forEach((column) => {
+  header?.forEach((column) => {
     headers.push(
       <TableColumn
         key={column}
