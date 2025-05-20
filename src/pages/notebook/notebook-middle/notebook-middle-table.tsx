@@ -147,6 +147,9 @@ function DataTable({ data, isLoading, sql }: TableProps) {
         maxTableHeight={500}
         rowHeight={40}
         radius={"none"}
+        classNames={{
+          wrapper: "shadow-none",
+        }}
       >
         <TableHeader>{getHeader(data.header)}</TableHeader>
         <TableBody
