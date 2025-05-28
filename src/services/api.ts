@@ -3,9 +3,10 @@
 import apiClient from "./apiClient";
 import { AxiosError, AxiosResponse } from "axios";
 
-interface ApiResponse<T> {
-  message: string;
+export interface ApiResponse<T> {
+  resp_msg: string;
   data: T;
+  resp_code: number;
 }
 
 // 统一处理请求错误

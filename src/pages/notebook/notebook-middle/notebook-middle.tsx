@@ -1,4 +1,4 @@
-import { post } from "@/services/api";
+import { ApiResponse, post } from "@/services/api";
 import AceEditor from "react-ace";
 import "ace-builds/src-noconflict/theme-monokai";
 import "ace-builds/src-noconflict/mode-sql";
@@ -22,6 +22,7 @@ import {
 import { memo, useState } from "react";
 import { format } from "sql-formatter";
 import NotebookMiddleBottom from "./notebook-mddle-bottom";
+import { AxiosError } from "axios";
 
 interface NotebookMiddleProps {
   source: string;
@@ -111,7 +112,21 @@ function NotebookMiddle({ source }: NotebookMiddleProps) {
                     });
                     setData(results);
                   } catch (error) {
-                    console.error(error);
+                    const axiosError = error as AxiosError<
+                      ApiResponse<unknown>
+                    >;
+                    if (axiosError.status !== 502) {
+                      setData({
+                        header: ["Error"],
+                        rows: [
+                          [
+                            axiosError?.response?.data?.resp_msg ??
+                              "Unknown error",
+                          ],
+                        ],
+                        query_time: "<1ms",
+                      });
+                    }
                   } finally {
                     setIsRunning(false);
                     setIsLoading(false);
