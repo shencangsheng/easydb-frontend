@@ -70,7 +70,7 @@ function DataTable({ data, isLoading, sql }: TableProps) {
               onPress={async () => await exportResults("JSON")}
             >
               <FontAwesomeIcon icon={faCode} style={{ marginRight: "5px" }} />
-              JSON
+              NdJson
             </DropdownItem>
           </DropdownMenu>
         </Dropdown>
