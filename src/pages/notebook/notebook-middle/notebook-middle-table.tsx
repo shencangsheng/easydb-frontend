@@ -54,6 +54,7 @@ function DataTable({ data, isLoading, sql }: TableProps) {
               <FontAwesomeIcon icon={faDownload} />
             </Button>
           </DropdownTrigger>
+          ``
           <DropdownMenu aria-label="Static Actions">
             <DropdownItem
               key="csv"
@@ -71,6 +72,16 @@ function DataTable({ data, isLoading, sql }: TableProps) {
             >
               <FontAwesomeIcon icon={faCode} style={{ marginRight: "5px" }} />
               NdJson
+            </DropdownItem>
+            <DropdownItem
+              key="tsv"
+              onPress={async () => await exportResults("TSV")}
+            >
+              <FontAwesomeIcon
+                icon={faFileCsv}
+                style={{ marginRight: "5px" }}
+              />
+              TSV
             </DropdownItem>
           </DropdownMenu>
         </Dropdown>
