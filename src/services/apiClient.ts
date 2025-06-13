@@ -4,7 +4,7 @@ import axios from "axios";
 // 创建一个 Axios 实例
 const apiClient = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL, // 使用环境变量配置基础 URL
-  timeout: 10000, // 设置请求超时时间
+  timeout: 1000 * 60 * 5, // 设置请求超时时间
 });
 
 // 请求拦截器
