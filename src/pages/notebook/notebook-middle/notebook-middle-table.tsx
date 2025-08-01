@@ -54,7 +54,6 @@ function DataTable({ data, isLoading, sql }: TableProps) {
               <FontAwesomeIcon icon={faDownload} />
             </Button>
           </DropdownTrigger>
-          ``
           <DropdownMenu aria-label="Static Actions">
             <DropdownItem
               key="csv"
